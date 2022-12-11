@@ -1,9 +1,11 @@
 import 'package:aula01_flutter_basics/question.dart';
+import 'package:aula01_flutter_basics/result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import './question.dart';
 import './answer.dart';
+import './quiz.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,13 +22,58 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   var _questionIndex = 0;
+  var _totalScore = 0;
 
-  void _answerQuestion() {
+  void _resetQuiz() {
+    setState(() {
+      _questionIndex = 0;
+      _totalScore = 0;
+    });
+  }
+
+  final _questions = [
+    {
+      'questionText': "What's your favorite color?",
+      'answers': [
+        {'text': 'Black', 'score': 0},
+        {'text': 'Red', 'score': 5},
+        {'text': 'Green', 'score': 4},
+        {'text': 'White', 'score': 2}
+      ]
+    },
+    {
+      'questionText': "What's yout favorite animal?",
+      'answers': [
+        {'text': 'Rabbit', 'score': 0},
+        {'text': "Snake", 'score': 3},
+        {'text': 'Elephant', 'score': 1},
+        {'text': 'Lion', 'score': 3}
+      ]
+    },
+    {
+      'questionText': "Another question?",
+      'answers': [
+        {'text': 'One', 'score': 1},
+        {'text': "Two", 'score': 2},
+        {'text': '3', 'score': 3},
+        {'text': 'pi', 'score': 0}
+      ]
+    },
+  ];
+
+  void _answerQuestion(int score) {
+    _totalScore += score;
+    print("_totalScore: ${_totalScore}");
+
+    if (_questionIndex + 1 < _questions.length) {
+      print("we have more questions");
+    }
+
     setState(() {
       _questionIndex = _questionIndex + 1;
     });
 
-    print("Question index: ${_questionIndex}");
+    print("Question index: ${_questionIndex + 1}/${_questions.length}");
   }
 
   /* Funções Anônimas:
@@ -39,36 +86,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    var questions = [
-      {
-        'questionText': "What's your favorite 456 color?",
-        'answers': ['Black', 'Red', 'Green', 'White']
-      },
-      {
-        'questionText': "What's yout favorite animal?",
-        'answers': ['Rabbit', "Snake", 'Elephant', 'Lion']
-      },
-      {
-        'questionText': "Another question",
-        'answers': ['One', "Two", '3', 'pi']
-      },
-    ];
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text("My First App")),
-        body: Column(
-          children: <Widget>[
-            Question(questions[_questionIndex]['questionText']),
-            ...(questions[_questionIndex]['answers'] as List<String>).map(
-              (answers) {
-                // este "map" faz um for com cada elemento da lista. (Não sei se não poderia usar um for)
-                // o "..." transforma a lista em elementos da lista. Repare que sem isto teríamos uma lista dentro de outra lista, não é isto que queremos.
-                //
-                return Answer(_answerQuestion, answers);
-              },
-            ).toList()
-          ],
-        ),
+        body: (_questionIndex < _questions.length)
+            ? Quiz(
+                // Para o código não ficar muito bagunçado, é sempre uma boa idea separar criando outra classe.
+                answerQuestion: _answerQuestion,
+                questionIndex: _questionIndex,
+                questions: _questions,
+              )
+            : Result(_totalScore, _resetQuiz),
       ),
     );
   }
